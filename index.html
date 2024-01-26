@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Analisis lokasi perumahan</title>
+    <link rel="stylesheet" href="library/leaflet/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="library/leaflet/leaflet.js"></script>
+    <script src="library/leaflet-providers-master/leaflet-providers.js"></script>
+    <script src="library/jquery.min.js"></script>
+</head>
+
+<body>
+    <div id="map">
+        <script>
+            var map = L.map('map').setView([-7.807528, 110.476569], 13);
+
+            var baseLayers = {
+                'Esri WorldTopoMap': L.tileLayer.provider('Esri.WorldTopoMap'),
+                'Esri WorldImagery': L.tileLayer.provider('Esri.WorldImagery').addTo(map),
+                'OSM Default': L.tileLayer.provider('OpenStreetMap.DE'),
+                'OSM France': L.tileLayer.provider('OpenStreetMap.France')
+            };
+
+
+            /* Memanggil Layer Rawan Banjir */
+            var AreaPerumahan = L.geoJson(null, {
+                style: function(feature) {
+                    return {
+                        color: "black",
+                        fillColor: KELASPERUMAHAN[feature.properties.KELAS_PERUMAHAN],
+                        weight: 0.00,
+                        opacity: 0,
+                        fillOpacity: 0.6
+                    };
+                },
+                onEachFeature: function( feature, layer ){
+                    layer.bindPopup(
+                        "Kelas Kesesuaian : " + "<left>" + feature.properties.KELAS_PERUMAHAN + "</left>" + "<br>" +
+                        "Luas :" + "<left>" + feature.properties.LUASAN + "</left>" + " m2"
+                        )
+                }
+            });
+            $.getJSON("data/KAWASAN_PERUMAHAN3_Geo.json", function(data) {
+                AreaPerumahan.addData(data);
+            });
+
+			/* Merubah Tampilan Warna Berdasar Atribut Klas Banjir */
+			var KELAS_PERUMAHAN = {
+				"SANGAT SESUAI":"#d3f0f2",
+				"SESUAI":"#9bd1e8",
+				"TIDAK SESUAI":"#6c76cc",
+				"SANGAT TIDAK SESUAI":"#1326d1",
+				
+			};
+
+            var mapLayers = {
+                'Kelas Kesesuaian Perumahan': AreaPerumahan
+            };
+
+            L.control.layers(baseLayers, mapLayers).addTo(map);
+        </script>
+    </div>
+</body>
+
+</html>
